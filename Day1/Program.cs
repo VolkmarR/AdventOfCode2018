@@ -9,7 +9,7 @@ namespace Day1_1
 {
     class Program
     {
-        // Load data form Inputfile
+        // Load data from Inputfile
         static List<int> LoadData()
         {
             var data = new List<int>();
@@ -23,13 +23,13 @@ namespace Day1_1
             return data;
         }
 
-        // Calclate frequency
+        // Calclate Frequency
         static int CalculateFrequency(List<int> data)
         {
             return data.Sum();
         }
 
-        // find the first frequency, that is calculated twice
+        // Find the first Frequency, that is calculated twice
         static int FindFrequencyCalculatedTwice(List<int> data)
         {
             var frequency = 0;
