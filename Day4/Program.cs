@@ -40,9 +40,9 @@ namespace Day4
             return File.ReadLines("input.txt").Select(q => new LineValues(q)).ToList();
         }
 
-        static int CalculatePart1(List<LineValues> data)
+        static Dictionary<int, Dictionary<int, int>> BuildCalenders(List<LineValues> data)
         {
-            var calenders = new Dictionary<int, Dictionary<int, int>>();
+            var result = new Dictionary<int, Dictionary<int, int>>();
 
             Dictionary<int, int> currentCalender = null;
             var lastAsleep = false;
@@ -62,14 +62,21 @@ namespace Day4
                     }
 
                 if (line.Action == LineAction.BeginShift)
-                    if (!calenders.TryGetValue(line.ID, out currentCalender))
+                    if (!result.TryGetValue(line.ID, out currentCalender))
                     {
                         currentCalender = new Dictionary<int, int>();
-                        calenders[line.ID] = currentCalender;
+                        result[line.ID] = currentCalender;
                     }
                 lastAsleep = (line.Action == LineAction.FallsAsleep);
-                lastMinute = newMinute;                
+                lastMinute = newMinute;
             }
+
+            return result;
+        }
+
+        static int CalculatePart1(List<LineValues> data)
+        {
+            var calenders = BuildCalenders(data);
 
             // Find the guard which sleeps the most
             var maxGuardID = 0;
@@ -85,10 +92,31 @@ namespace Day4
             }
 
             // Find the minute with the higest count
-            currentCalender = calenders[maxGuardID];
-            var item = currentCalender.OrderByDescending(q => q.Value).First();
+            var item = calenders[maxGuardID].OrderByDescending(q => q.Value).First();
 
             return maxGuardID * item.Key;
+        }
+
+        static int CalculatePart2(List<LineValues> data)
+        {
+            var calenders = BuildCalenders(data);
+
+            // Find the guard and the minute 
+            var maxGuardID = 0;
+            var maxMinute = 0;
+            var maxMinuteCount = 0;
+            foreach (var calender in calenders)
+            {
+                var maxSleepMinute = calender.Value.OrderByDescending(q => q.Value).FirstOrDefault();
+                if (maxSleepMinute.Value > maxMinuteCount)
+                {
+                    maxGuardID = calender.Key;
+                    maxMinute = maxSleepMinute.Key;
+                    maxMinuteCount = maxSleepMinute.Value;
+                }
+            }
+
+            return maxGuardID * maxMinute;
         }
 
         static void Main(string[] args)
@@ -97,7 +125,7 @@ namespace Day4
 
             Console.WriteLine($"Part1: {CalculatePart1(data)}");
 
-
+            Console.WriteLine($"Part2: {CalculatePart2(data)}");
         }
     }
 }
