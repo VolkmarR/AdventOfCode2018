@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1D458D1F-A460-471A-95C5-FFF5F3A4CA7B}</ProjectGuid>
+    <ProjectGuid>{063AAA5C-C2C6-4F5C-95E2-DB45B1BAFACE}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Day6</RootNamespace>
-    <AssemblyName>Day6</AssemblyName>
+    <RootNamespace>Day7</RootNamespace>
+    <AssemblyName>Day7</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
