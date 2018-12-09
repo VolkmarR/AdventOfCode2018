@@ -17,29 +17,38 @@ namespace Day9
 
         class Game
         {
-            private List<int> data { get; set; } = new List<int> { 0 };
-            private int currentPos = 0;
+            private LinkedList<int> data { get; set; }
+            private LinkedListNode<int> currentNode;
+            private int nextModulo23 = 23;
 
             public int PlayRount(int marble)
             {
-                if (marble % 23 == 0)
+                if (marble == nextModulo23)
                 {
-                    currentPos -= 7;
-                    if (currentPos < 0)
-                        currentPos += data.Count;
-                    var points = data[currentPos] + marble;
-                    data.RemoveAt(currentPos);
+                    nextModulo23 += 23;
+                    var remove = currentNode;
+                    for (int i = 0; i < 7; i++)
+                        if (remove.Previous != null)
+                            remove = remove.Previous;
+                        else
+                            remove = data.Last;
+                    
+                    var points = remove.Value + marble;
+                    if (remove.Next != null)
+                        currentNode = remove.Next;
+                    else
+                        currentNode = data.First;
+
+                    data.Remove(remove);
                     return points;
                 }
 
-                if (currentPos == data.Count - 2 || data.Count == 1)
-                    data.Add(marble);
-                else if (currentPos == data.Count - 1)
-                    data.Insert(1, marble);
+                if (currentNode.Next == null)
+                    currentNode = data.First;
                 else
-                    data.Insert(currentPos + 2, marble);
+                    currentNode = currentNode.Next;
 
-                currentPos = data.IndexOf(marble);
+                currentNode = data.AddAfter(currentNode, marble);
                 return 0;
             }
 
@@ -47,6 +56,13 @@ namespace Day9
             {
                 return string.Join(" ", data);
             }
+
+            public Game()
+            {
+                data = new LinkedList<int>();
+                currentNode = data.AddFirst(0);
+            }
+
         }
 
         private static Data LoadData()
@@ -55,17 +71,19 @@ namespace Day9
             return new Data { PlayerCount = Convert.ToInt32(parts[0]), LastMarble = Convert.ToInt32(parts[6]) };
         }
 
-        private static int CalculatePart1(Data data)
+        private static long CalculatePart1(Data data)
         {
             var game = new Game();
             var player = 1;
-            var points = new Dictionary<int, int>();
+            var points = new Dictionary<int, long>();
             for (int i = 1; i <= data.PlayerCount; i++)
                 points[i] = 0;
 
             for (int marble = 1; marble <= data.LastMarble; marble++)
             {
-                points[player] = points[player] + game.PlayRount(marble);
+                var newPoints = game.PlayRount(marble);
+                if (newPoints > 0)
+                    points[player] += newPoints;
 
                 player = player < data.PlayerCount ? player + 1 : 1;
             }
@@ -73,9 +91,10 @@ namespace Day9
             return points.Values.Max();
         }
 
-        private static string CalculatePart2(Data data)
+        private static long CalculatePart2(Data data)
         {
-            return "";
+            data.LastMarble = data.LastMarble * 100;
+            return CalculatePart1(data);
         }
 
         static void Main(string[] args)
