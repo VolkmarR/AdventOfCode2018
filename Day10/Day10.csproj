@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{C06B0BA7-CEDD-4256-994D-B4F58EDF3811}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Dary10</RootNamespace>
-    <AssemblyName>Dary10</AssemblyName>
+    <RootNamespace>Day10</RootNamespace>
+    <AssemblyName>Day10</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
