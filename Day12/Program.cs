@@ -11,12 +11,13 @@ namespace Day12
     {
         class Tunnel
         {
-            private StringBuilder buffer = new StringBuilder();
             public List<bool> Pods { get; set; }
             public int Position0 { get; set; }
             public int PodCount { get; set; }
 
-            public Dictionary<string, bool> Rules { get; set; }
+            public Dictionary<int, bool> Rules { get; set; }
+
+            private int MinRuleKey;
 
             public Tunnel(string initialState)
             {
@@ -30,25 +31,36 @@ namespace Day12
                 for (int i = 0; i < data.Length; i++)
                     Pods[Position0 + i] = data[i] == '#';
 
-                Rules = new Dictionary<string, bool>();
+                Rules = new Dictionary<int, bool>();
             }
 
             public void AddRule(string data)
             {
-                // ...## => #
+                int pattern = 0;
                 if (!string.IsNullOrEmpty(data) && data.EndsWith("#"))
-                    Rules.Add(data.Substring(0, 5), true);
+                {
+                    foreach (var ch in data.Substring(0, 5))
+                    {
+                        pattern = pattern << 1;
+                        if (ch == '#')
+                            pattern++;
+                    }
+
+                    Rules.Add(pattern, true);
+                    MinRuleKey = Rules.Keys.Min();
+                }
             }
 
-            private string GetPattern(int podIndex)
+            private int GetPattern(int podIndex)
             {
-                buffer.Length = 0;
+                var result = 0;
                 for (int i = podIndex - 2; i <= podIndex + 2; i++)
+                {
+                    result = result << 1;
                     if (Pods[i])
-                        buffer.Append('#');
-                    else
-                        buffer.Append('.');
-                return buffer.ToString();
+                        result++;
+                }
+                return result;
             }
 
             public void AddGeneration()
@@ -60,9 +72,8 @@ namespace Day12
                 for (int i = 2; i < PodCount - 2; i++)
                 {
                     var pattern = GetPattern(i);
-                    bool plant;
-                    if (Rules.TryGetValue(pattern, out plant))
-                        PodsNext[i] = plant;
+                    if (pattern >= MinRuleKey && Rules.ContainsKey(pattern))
+                        PodsNext[i] = true;
                 }
 
                 Pods = PodsNext;
@@ -104,15 +115,15 @@ namespace Day12
         {
             var data = LoadData();
 
-            Console.WriteLine($"Part1: {Calculate(data,20)}");
+            Console.WriteLine($"Part1: {Calculate(data, 20)}");
             Console.ReadLine();
 
             var now = DateTime.Now;
 
             // Console.WriteLine($"Part2: {Calculate(data, 50000000000)}");
-            Console.WriteLine($"Part2: {Calculate(data, 50000)}");
+            Console.WriteLine($"Part2: {Calculate(data, 500000)}");
             Console.WriteLine(DateTime.Now - now);
-            
+
             Console.ReadLine();
         }
     }
