@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,9 +12,8 @@ namespace Day12
     {
         class Tunnel
         {
-            public List<bool> Pods { get; set; }
+            public BitArray Pods { get; set; }
             public int Position0 { get; set; }
-            public int PodCount { get; set; }
 
             public Dictionary<int, bool> Rules { get; set; }
 
@@ -21,12 +21,10 @@ namespace Day12
 
             public Tunnel(string initialState)
             {
-                Pods = new List<bool>();
+
                 var data = initialState.Substring(15);
-                Position0 = data.Length + 1;
-                PodCount = data.Length * 3;
-                for (int i = 0; i < PodCount; i++)
-                    Pods.Add(false);
+                Pods = new BitArray(data.Length + 10);
+                Position0 = 5;
 
                 for (int i = 0; i < data.Length; i++)
                     Pods[Position0 + i] = data[i] == '#';
@@ -63,29 +61,47 @@ namespace Day12
                 return result;
             }
 
-            public void AddGeneration()
+            public bool AddGeneration()
             {
-                var PodsNext = new List<bool>(PodCount);
-                for (int i = 0; i < PodCount; i++)
-                    PodsNext.Add(false);
-
-                for (int i = 2; i < PodCount - 2; i++)
+                var PodsNext = new BitArray(Pods.Length);
+                for (int i = 2; i < Pods.Count - 2; i++)
                 {
                     var pattern = GetPattern(i);
                     if (pattern >= MinRuleKey && Rules.ContainsKey(pattern))
                         PodsNext[i] = true;
                 }
 
+                // Check if the new Pods array is equal to the old one 
+                // (Pattern match - Thanks to the hint from https://www.reddit.com/r/adventofcode/comments/a5eztl/2018_day_12_solutions/ebm4c9d)
+                bool equal = true;
+                for (int i = 2; i < Pods.Count - 2; i++)
+                    equal = equal && (PodsNext[i + 1] == Pods[i]);
+
                 Pods = PodsNext;
+                if (GetPattern(Pods.Count - 3) > 0)
+                    Pods.Length = Pods.Length + 1;
+
+                return equal;
             }
 
-            public int Sum()
+            public long Sum()
             {
-                var result = 0;
-                for (int i = 0; i < PodCount; i++)
+                long result = 0;
+                for (int i = 0; i < Pods.Count; i++)
                     if (Pods[i])
-                        result += i - Position0;
+                        result += (i - Position0);
                 return result;
+            }
+
+            public void Dump()
+            {
+                Console.Write($"{Position0} : ");
+
+                for (int i = 0; i < Pods.Count; i++)
+                    Console.Write(Pods[i] ? '#' : '.');
+
+                Console.WriteLine();
+                Console.WriteLine();
             }
         }
 
@@ -99,13 +115,20 @@ namespace Day12
             return result;
         }
 
-        static int Calculate(Tunnel data, long Generations)
+        static long Calculate(Tunnel data, long Generations)
         {
-            for (long i = 0; i < Generations; i++)
+            long lastSum = 0;
+            for (long i = 1; i <= Generations; i++)
             {
-                data.AddGeneration();
-                if (i % 10000 == 0)
-                    Console.WriteLine(Generations - i);
+                if (data.AddGeneration())
+                {
+                    // if a pattern was recognized, then calc the result buy adding the difference between the last and the current sum
+                    // multiplied by the reaining solutions
+                    var sum = data.Sum();
+                    return sum + (sum - lastSum) * (Generations - i);
+                }
+                else
+                    lastSum = data.Sum();
             }
             var result = data.Sum();
             return result;
@@ -114,17 +137,10 @@ namespace Day12
         static void Main(string[] args)
         {
             var data = LoadData();
-
             Console.WriteLine($"Part1: {Calculate(data, 20)}");
-            Console.ReadLine();
 
-            var now = DateTime.Now;
-
-            // Console.WriteLine($"Part2: {Calculate(data, 50000000000)}");
-            Console.WriteLine($"Part2: {Calculate(data, 500000)}");
-            Console.WriteLine(DateTime.Now - now);
-
-            Console.ReadLine();
+            data = LoadData();
+            Console.WriteLine($"Part2: {Calculate(data, 50000000000)}");
         }
     }
 }
